@@ -8,12 +8,17 @@ conso db 0
 digit db 0
 space db 0
 prompt1 db "Enter a String: $"
+pr_vowel db "Vowels: $"
+pr_conso db "Consonants: $"
+pr_digit db "Digits: $"
+pr_space db "Spaces: $"
 str db dup(25)
 
 .code
 main proc
     mov ax, @data
     mov ds, ax
+    
     
     mov ah, 9
     lea dx, prompt1
@@ -22,12 +27,50 @@ main proc
     call input
     call newline
     
-    mov cx, 0
-    mov cl, strlen  
+    call vowel_cons
+    call space_count 
+    call digit_count 
     
     mov ah, 9
-    lea dx, str
+    lea dx, pr_vowel
     int 21h
+    
+    mov ah, 2
+    mov dl, vow
+    add dl, '0'
+    int 21h
+    call newline
+    
+    mov ah, 9
+    lea dx, pr_conso
+    int 21h
+    
+    mov ah, 2
+    mov dl, conso
+    add dl, '0'
+    int 21h
+    call newline  
+    
+    mov ah, 9
+    lea dx, pr_digit
+    int 21h
+    
+    mov ah, 2
+    mov dl, digit
+    add dl, '0'
+    int 21h
+    call newline 
+    
+    mov ah, 9
+    lea dx, pr_space
+    int 21h
+    
+    mov ah, 2
+    mov dl, space
+    add dl, '0'
+    int 21h
+    call newline
+    
     
     
     mov ah, 4ch
@@ -61,7 +104,58 @@ input proc
     mov strlen, cl
     mov [si-1], '$'
     ret
-input endp
+input endp 
+
+
+space_count proc
+    lea si, str
+    mov cx, 0
+    mov cl, strlen
+    
+    stop:
+        cmp [si], ' '
+        je spinc
+        jne cnt1
+        
+        spinc:
+        mov ah, space
+        inc ah
+        mov space, ah
+        
+        cnt1:        
+        inc si
+        loop stop  
+
+    ret
+space_count endp 
+
+digit_count proc
+    lea si, str
+    mov cx, 0
+    mov cl, strlen
+    
+    dtop:
+        cmp [si], '0'
+        jge d0
+        jl cnt2 
+        
+        d0:
+        cmp [si], '9'
+        jle dinc
+        jg cnt2
+        
+        
+        dinc:
+        mov ah, digit
+        inc ah
+        mov digit, ah
+        
+        cnt2:        
+        inc si
+        loop dtop  
+
+    ret
+digit_count endp
 
 vowel_cons proc
     lea si, str
